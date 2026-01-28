@@ -1,0 +1,48 @@
+{
+  "name": "witsec",
+  "version": "1.0.0",
+  "description": "Secure Express backend with PostgreSQL, Redis, and JWT authentication",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "test": "jest --coverage",
+    "migrate": "node src/utils/migrate.js",
+    "seed": "node src/utils/seed.js",
+    "test:security": "jest tests/security.test.js --verbose",
+    "test:security-quick": "node tests/security.test.js"
+  },
+  "keywords": [
+    "express",
+    "postgresql",
+    "redis",
+    "jwt",
+    "security"
+  ],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "compression": "^1.7.4",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.6",
+    "dotenv": "^17.2.3",
+    "express": "^4.22.1",
+    "express-rate-limit": "^8.2.1",
+    "express-validator": "^7.3.1",
+    "helmet": "^8.1.0",
+    "hpp": "^0.2.3",
+    "joi": "^18.0.2",
+    "jsonwebtoken": "^9.0.3",
+    "morgan": "^1.10.0",
+    "pg": "^8.17.2",
+    "redis": "^5.10.0",
+    "uuid": "^12.0.0"
+  },
+  "devDependencies": {
+    "jest": "^30.1.3",
+    "nodemon": "^3.1.11",
+    "supertest": "^7.1.4"
+  }
+}
