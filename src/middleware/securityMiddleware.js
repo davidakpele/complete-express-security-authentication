@@ -7,7 +7,6 @@ const cors = require('cors');
 const crypto = require('crypto');
 const { TooManyRequestsError } = require('../exceptions/customExceptions');
 
-// Helper function to extract IP - must be called before rate limiters
 const extractClientIP = (req) => {
   return req.headers['x-forwarded-for']?.split(',')[0].trim() ||
     req.headers['x-real-ip'] ||
@@ -210,7 +209,6 @@ const noSQLInjectionProtection = (req, res, next) => {
 
   const checkNoSQLInjection = (obj) => {
     if (obj && typeof obj === 'object') {
-      // FIXED: Check arrays recursively instead of blanket rejection
       if (Array.isArray(obj)) {
         for (const item of obj) {
           if (checkNoSQLInjection(item)) {
@@ -290,9 +288,7 @@ const noSQLInjectionProtection = (req, res, next) => {
 };
 
 const sqlInjectionProtection = (req, res, next) => {
-  // FIXED: More targeted SQL injection patterns to reduce false positives
   const sqlInjectionPatterns = [
-    // Actual SQL injection patterns with context
     /(\bSELECT\b.*\bFROM\b)/gi,
     /(\bINSERT\s+INTO\b)/gi,
     /(\bUPDATE\b.*\bSET\b)/gi,
@@ -300,15 +296,11 @@ const sqlInjectionProtection = (req, res, next) => {
     /(\bDROP\s+(TABLE|DATABASE)\b)/gi,
     /(\bUNION\s+(ALL\s+)?SELECT\b)/gi,
     /(\bEXEC(UTE)?\s*\()/gi,
-    // SQL comments in suspicious contexts (multiple dashes or with quotes)
     /(--\s*$|--\s*[;'"])/gm,
     /\/\*.*\*\//gs,
-    // Classic injection: ' OR '1'='1
     /['"]\s*OR\s+['"]\d+['"]\s*=\s*['"]\d+/gi,
     /['"]\s*OR\s+\d+\s*=\s*\d+/gi,
-    // Time-based attacks
     /(\b(WAITFOR|SLEEP|BENCHMARK)\s*\()/gi,
-    // Stored procedures
     /(xp_cmdshell|sp_executesql)/gi,
   ];
 
@@ -323,7 +315,6 @@ const sqlInjectionProtection = (req, res, next) => {
     return false;
   };
 
-  // FIXED: Check each field individually instead of stringifying entire object
   const checkObjectFields = (obj, location) => {
     for (const key in obj) {
       if (obj.hasOwnProperty(key)) {
@@ -423,7 +414,6 @@ const botDetection = (req, res, next) => {
     'skipfish',
   ];
   
-  // FIXED: More nuanced handling - warn but don't block legitimate tools outside auth
   const suspiciousTools = [
     'wget',
     'curl',
@@ -448,8 +438,6 @@ const botDetection = (req, res, next) => {
   for (const tool of suspiciousTools) {
     if (userAgent.includes(tool)) {
       console.warn(`Suspicious automated tool detected: ${tool} from IP: ${req.clientIP}, User-Agent: ${req.headers['user-agent']}`);
-      
-      // Only block on sensitive endpoints
       if (req.path.includes('/auth/') || req.path.includes('/login') || req.path.includes('/register')) {
         return res.status(403).json({
           success: false,
@@ -489,7 +477,6 @@ const securityHeaders = (req, res, next) => {
   next();
 };
 
-// FIXED: Use crypto for secure request ID generation
 const generateRequestId = () => {
   return `req_${Date.now()}_${crypto.randomBytes(8).toString('hex')}`;
 };
